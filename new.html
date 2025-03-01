@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Formula Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            flex-direction: column;
+            overflow: auto;
+            box-sizing: border-box;
+        }
+    
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: auto;
+        }
+    
+        .question {
+            margin-top: 30px;
+            font-size: 5em; /* Increased font size */
+            margin-bottom: 70px;
+        }
+    
+        .options {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+        }
+    
+        .options button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            transition: 0.3s ease;
+            width: auto;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+    
+        .options button:hover {
+            background-color: #0056b3;
+        }
+    
+        .result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+    
+        /* Custom scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 12px;
+            transition-duration: 2s;
+        }
+    
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+    
+        ::-webkit-scrollbar-thumb {
+            background-color: #b6c0ca;
+            border-radius: 10px;
+            border: 3px solid #f0f0f0;
+        }
+    
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #6d8eb1;
+            transition-duration: 2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <div class="result" id="result"></div>
+        <button onclick="nextQuestion()" style="margin-top: 20px; margin-bottom: 20px;  padding: 10px 20px; border: none; border-radius: 4px; background-color: #28a745; color: #fff; font-size: 1.5em; cursor: pointer; transition: 0.3s ease;">Next Question</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "(a + b)² = ?",
+                options: ["a² + 2ab + b²", "a² - 2ab + b²", "a² + b²"],
+                answer: "a² + 2ab + b²"
+            },
+            {
+                question: "(a - b)² = ?",
+                options: ["a² - 2ab + b²", "a² + 2ab + b²", "a² - b²"],
+                answer: "a² - 2ab + b²"
+            },
+            {
+                question: "(a + b)(a - b) = ?",
+                options: ["a² - b²", "a² + b²", "a² - 2ab + b²"],
+                answer: "a² - b²"
+            },
+            {
+                question: "(x + a)(x + b) = ?",
+                options: ["x² + (a + b)x + ab", "x² - (a + b)x + ab", "x² + ab"],
+                answer: "x² + (a + b)x + ab"
+            },
+            {
+                question: "(ax + b)(cx + d) = ?",
+                options: ["acx² + (ad + bc)x + bd", "acx² - (ad + bc)x + bd", "acx² + bd"],
+                answer: "acx² + (ad + bc)x + bd"
+            },
+            {
+                question: "(x + a)(x + b)(x + c) = ?",
+                options: ["x³ + (a + b + c)x² + (ab + bc + ca)x + abc", "x³ - (a + b + c)x² + (ab + bc + ca)x + abc", "x³ + (a + b + c)x² + abc"],
+                answer: "x³ + (a + b + c)x² + (ab + bc + ca)x + abc"
+            },
+            {
+                question: "(a + b + c)² = ?",
+                options: ["a² + b² + c² + 2ab + 2bc + 2ca", "a² + b² + c² - 2ab - 2bc - 2ca", "a² + b² + c²"],
+                answer: "a² + b² + c² + 2ab + 2bc + 2ca"
+            },
+            {
+                question: "(a + b)³ = ?",
+                options: ["a³ + 3a²b + 3ab² + b³", "a³ - 3a²b + 3ab² - b³", "a³ + b³"],
+                answer: "a³ + 3a²b + 3ab² + b³"
+            },
+            {
+                question: "(a - b)³ = ?",
+                options: ["a³ - 3a²b + 3ab² - b³", "a³ + 3a²b - 3ab² + b³", "a³ - b³"],
+                answer: "a³ - 3a²b + 3ab² - b³"
+            },
+            {
+                question: "(a + b)(a² - ab + b²) = ?",
+                options: ["a³ + b³", "a³ - b³", "a³ + 3ab² + b³"],
+                answer: "a³ + b³"
+            },
+            {
+                question: "(a - b)(a² + ab + b²) = ?",
+                options: ["a³ - b³", "a³ + b³", "a³ - 3ab² + b³"],
+                answer: "a³ - b³"
+            },
+            {
+                question: "(a + b + c)(a² + b² + c² - ab - bc - ca) = ?",
+                options: ["a³ + b³ + c³ - 3abc", "a³ + b³ + c³ + 3abc", "a³ + b³ + c³"],
+                answer: "a³ + b³ + c³ - 3abc"
+            }
+        ];
+    
+        let currentQuestionIndex = 0;
+    
+        function loadQuestion() {
+            const questionElement = document.getElementById('question');
+            const optionsElement = document.getElementById('options');
+            const resultElement = document.getElementById('result');
+            const quizContainer = document.querySelector('.quiz-container');
+            resultElement.innerHTML = '';
+            quizContainer.style.border = 'none';
+    
+            const currentQuestion = questions[currentQuestionIndex];
+            questionElement.innerHTML = currentQuestion.question;
+            optionsElement.innerHTML = '';
+    
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.innerHTML = option;
+                button.onclick = () => checkAnswer(option);
+                optionsElement.appendChild(button);
+            });
+        }
+    
+        function checkAnswer(selectedOption) {
+            const resultElement = document.getElementById('result');
+            const quizContainer = document.querySelector('.quiz-container');
+            const currentQuestion = questions[currentQuestionIndex];
+    
+            if (selectedOption === currentQuestion.answer) {
+                resultElement.innerHTML = 'Correct!';
+                resultElement.style.color = 'green';
+                quizContainer.style.border = '5px solid green';
+            } else {
+                resultElement.innerHTML = 'Incorrect!';
+                resultElement.style.color = 'red';
+                quizContainer.style.border = '5px solid red';
+            }
+        }
+    
+        function nextQuestion() {
+            currentQuestionIndex = Math.floor(Math.random() * questions.length);
+            loadQuestion();
+        }
+    
+        window.onload = nextQuestion;
+    </script>
+</body>
+</html>
