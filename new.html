@@ -15,29 +15,32 @@
             flex-direction: column;
             overflow: auto;
             box-sizing: border-box;
+            transition: background-color 0.3s ease;
         }
-    
+
         .quiz-container {
+            position: relative;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: auto;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-    
+
         .question {
             margin-top: 30px;
             font-size: 5em; /* Increased font size */
             margin-bottom: 70px;
         }
-    
+
         .options {
             display: flex;
             justify-content: space-evenly;
             flex-wrap: wrap;
         }
-    
+
         .options button {
             margin: 10px;
             padding: 10px 20px;
@@ -50,45 +53,105 @@
             font-size: 1.5em;
             cursor: pointer;
         }
-    
+
         .options button:hover {
             background-color: #0056b3;
         }
-    
+
         .result {
             font-size: 1.2em;
             margin-top: 20px;
         }
-    
+
+        .dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .dark-mode .quiz-container {
+            background-color: #444;
+            color: #fff;
+        }
+
+        .dark-mode .options button {
+            background-color: #1e90ff; /* Brighter blue */
+            color: #fff;
+        }
+
+        .dark-mode .options button:hover {
+            background-color: #1c86ee; /* Brighter blue on hover */
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .dark-mode .dark-mode-toggle {
+            color: #fff;
+        }
+
         /* Custom scrollbar styles */
         ::-webkit-scrollbar {
             width: 12px;
             transition-duration: 2s;
         }
-    
+
         ::-webkit-scrollbar-track {
             background: #f0f0f0;
             border-radius: 10px;
         }
-    
+
         ::-webkit-scrollbar-thumb {
             background-color: #b6c0ca;
             border-radius: 10px;
             border: 3px solid #f0f0f0;
         }
-    
+
         ::-webkit-scrollbar-thumb:hover {
             background-color: #6d8eb1;
             transition-duration: 2s;
+        }
+
+        /* Media queries for mobile devices */
+        @media (max-width: 600px) {
+            .question {
+                font-size: 2em; /* Smaller font size for mobile */
+                margin-bottom: 30px;
+            }
+
+            .options button {
+                font-size: 1em; /* Smaller font size for mobile */
+                padding: 10px;
+                width: 100%; /* Full width for mobile */
+                max-width: 200px;
+            }
+
+            .result {
+                font-size: 1em; /* Smaller font size for mobile */
+            }
+
+            .quiz-container {
+                width: 90%; /* Adjust width for mobile */
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="quiz-container">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
         <div class="question" id="question"></div>
         <div class="options" id="options"></div>
         <div class="result" id="result"></div>
-        <button onclick="nextQuestion()" style="margin-top: 20px; margin-bottom: 20px;  padding: 10px 20px; border: none; border-radius: 4px; background-color: #28a745; color: #fff; font-size: 1.5em; cursor: pointer; transition: 0.3s ease;">Next Question</button>
+        <button onclick="nextQuestion()" style="margin-top: 20px; margin-bottom: 20px; padding: 10px 20px; border: none; border-radius: 4px; background-color: #28a745; color: #fff; font-size: 1.5em; cursor: pointer; transition: 0.3s ease;">Next Question</button>
     </div>
 
     <script>
@@ -154,9 +217,16 @@
                 answer: "a³ + b³ + c³ - 3abc"
             }
         ];
-    
+
         let currentQuestionIndex = 0;
-    
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
         function loadQuestion() {
             const questionElement = document.getElementById('question');
             const optionsElement = document.getElementById('options');
@@ -164,11 +234,14 @@
             const quizContainer = document.querySelector('.quiz-container');
             resultElement.innerHTML = '';
             quizContainer.style.border = 'none';
-    
+
             const currentQuestion = questions[currentQuestionIndex];
             questionElement.innerHTML = currentQuestion.question;
             optionsElement.innerHTML = '';
-    
+
+            // Shuffle the options array
+            shuffle(currentQuestion.options);
+
             currentQuestion.options.forEach(option => {
                 const button = document.createElement('button');
                 button.innerHTML = option;
@@ -176,12 +249,12 @@
                 optionsElement.appendChild(button);
             });
         }
-    
+
         function checkAnswer(selectedOption) {
             const resultElement = document.getElementById('result');
             const quizContainer = document.querySelector('.quiz-container');
             const currentQuestion = questions[currentQuestionIndex];
-    
+
             if (selectedOption === currentQuestion.answer) {
                 resultElement.innerHTML = 'Correct!';
                 resultElement.style.color = 'green';
@@ -192,13 +265,32 @@
                 quizContainer.style.border = '5px solid red';
             }
         }
-    
+
         function nextQuestion() {
             currentQuestionIndex = Math.floor(Math.random() * questions.length);
             loadQuestion();
         }
-    
-        window.onload = nextQuestion;
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        function loadDarkMode() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        window.onload = () => {
+            loadDarkMode();
+            nextQuestion();
+        };
     </script>
 </body>
 </html>
